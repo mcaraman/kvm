@@ -69,6 +69,12 @@ extern unsigned long kvmppc_booke_handlers;
 void kvmppc_set_msr(struct kvm_vcpu *vcpu, u32 new_msr);
 void kvmppc_mmu_msr_notify(struct kvm_vcpu *vcpu, u32 old_msr);
 
+#ifdef CONFIG_64BIT
+void kvmppc_set_epcr(struct kvm_vcpu *vcpu, u32 new_epcr);
+#else
+static inline void kvmppc_set_epcr(struct kvm_vcpu *vcpu, u32 new_epcr) {}
+#endif
+
 void kvmppc_set_tcr(struct kvm_vcpu *vcpu, u32 new_tcr);
 void kvmppc_set_tsr_bits(struct kvm_vcpu *vcpu, u32 tsr_bits);
 void kvmppc_clr_tsr_bits(struct kvm_vcpu *vcpu, u32 tsr_bits);

@@ -1264,6 +1264,16 @@ void kvmppc_core_commit_memory_region(struct kvm *kvm,
 {
 }
 
+#ifdef CONFIG_64BIT
+void kvmppc_set_epcr(struct kvm_vcpu *vcpu, u32 new_epcr)
+{
+	vcpu->arch.epcr = new_epcr;
+	vcpu->arch.shadow_epcr &= ~SPRN_EPCR_GICM;
+	if (vcpu->arch.epcr  & SPRN_EPCR_ICM)
+		vcpu->arch.shadow_epcr |= SPRN_EPCR_GICM;
+}
+#endif
+
 void kvmppc_set_tcr(struct kvm_vcpu *vcpu, u32 new_tcr)
 {
 	vcpu->arch.tcr = new_tcr;

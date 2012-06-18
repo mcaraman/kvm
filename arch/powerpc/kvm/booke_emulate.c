@@ -13,7 +13,7 @@
  * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  * Copyright IBM Corp. 2008
- * Copyright 2011 Freescale Semiconductor, Inc.
+ * Copyright 2011-2012 Freescale Semiconductor, Inc.
  *
  * Authors: Hollis Blanchard <hollisb@us.ibm.com>
  */
@@ -207,6 +207,12 @@ int kvmppc_booke_emulate_mtspr(struct kvm_vcpu *vcpu, int sprn, ulong spr_val)
 	case SPRN_IVOR15:
 		vcpu->arch.ivor[BOOKE_IRQPRIO_DEBUG] = spr_val;
 		break;
+#ifdef CONFIG_64BIT
+	case SPRN_EPCR:
+		kvmppc_set_epcr(vcpu, spr_val);
+		mtspr(SPRN_EPCR, vcpu->arch.shadow_epcr);
+		break;
+#endif
 
 	default:
 		emulated = EMULATE_FAIL;
@@ -293,6 +299,11 @@ int kvmppc_booke_emulate_mfspr(struct kvm_vcpu *vcpu, int sprn, ulong *spr_val)
 	case SPRN_IVOR15:
 		*spr_val = vcpu->arch.ivor[BOOKE_IRQPRIO_DEBUG];
 		break;
+#ifdef CONFIG_64BIT
+	case SPRN_EPCR:
+		*spr_val = vcpu->arch.epcr;
+		break;
+#endif
 
 	default:
 		emulated = EMULATE_FAIL;

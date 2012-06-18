@@ -1073,6 +1073,9 @@ static void get_sregs_base(struct kvm_vcpu *vcpu,
 	u64 tb = get_tb();
 
 	sregs->u.e.features |= KVM_SREGS_E_BASE;
+#ifdef CONFIG_64BIT
+	sregs->u.e.features |= KVM_SREGS_E_64;
+#endif
 
 	sregs->u.e.csrr0 = vcpu->arch.csrr0;
 	sregs->u.e.csrr1 = vcpu->arch.csrr1;
@@ -1084,6 +1087,9 @@ static void get_sregs_base(struct kvm_vcpu *vcpu,
 	sregs->u.e.dec = kvmppc_get_dec(vcpu, tb);
 	sregs->u.e.tb = tb;
 	sregs->u.e.vrsave = vcpu->arch.vrsave;
+#ifdef CONFIG_64BIT
+	sregs->u.e.epcr = vcpu->arch.epcr;
+#endif
 }
 
 static int set_sregs_base(struct kvm_vcpu *vcpu,
@@ -1092,6 +1098,11 @@ static int set_sregs_base(struct kvm_vcpu *vcpu,
 	if (!(sregs->u.e.features & KVM_SREGS_E_BASE))
 		return 0;
 
+#ifdef CONFIG_64BIT
+	if (!(sregs->u.e.features & KVM_SREGS_E_64))
+		return 0;
+#endif
+
 	vcpu->arch.csrr0 = sregs->u.e.csrr0;
 	vcpu->arch.csrr1 = sregs->u.e.csrr1;
 	vcpu->arch.mcsr = sregs->u.e.mcsr;
@@ -1099,6 +1110,9 @@ static int set_sregs_base(struct kvm_vcpu *vcpu,
 	set_guest_dear(vcpu, sregs->u.e.dear);
 	vcpu->arch.vrsave = sregs->u.e.vrsave;
 	kvmppc_set_tcr(vcpu, sregs->u.e.tcr);
+#ifdef CONFIG_64BIT
+	kvmppc_set_epcr(vcpu, sregs->u.e.epcr);
+#endif
 
 	if (sregs->u.e.update_special & KVM_SREGS_E_UPDATE_DEC) {
 		vcpu->arch.dec = sregs->u.e.dec;

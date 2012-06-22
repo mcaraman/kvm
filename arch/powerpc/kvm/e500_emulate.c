@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 Freescale Semiconductor, Inc. All rights reserved.
+ * Copyright (C) 2008-2012 Freescale Semiconductor, Inc. All rights reserved.
  *
  * Author: Yu Liu, <yu.liu@freescale.com>
  *
@@ -89,6 +89,9 @@ static inline ulong kvmppc_get_ea_indexed(struct kvm_vcpu *vcpu, int ra, int rb)
 	ea = kvmppc_get_gpr(vcpu, rb);
 	if (ra)
 		ea += kvmppc_get_gpr(vcpu, ra);
+
+	if (!(vcpu->arch.shared->msr & MSR_CM))
+		ea &= 0xffffffffUL;
 
 	return ea;
 }

@@ -40,36 +40,36 @@
  **********************************************************************/
 
 .macro tlb_prolog_bolted intnum addr
-	mtspr	SPRN_SPRG_TLB_SCRATCH,r13
+	mtspr	SPRN_SPRG_GEN_SCRATCH,r13
 	mfspr	r13,SPRN_SPRG_PACA
-	std	r10,PACA_EXTLB+EX_TLB_R10(r13)
+	std	r10,PACA_EXGEN+EX_R10(r13)
 	mfcr	r10
-	std	r11,PACA_EXTLB+EX_TLB_R11(r13)
+	std	r11,PACA_EXGEN+EX_R11(r13)
 #ifdef CONFIG_KVM_BOOKE_HV
 BEGIN_FTR_SECTION
 	mfspr	r11, SPRN_SRR1
 END_FTR_SECTION_IFSET(CPU_FTR_EMB_HV)
 #endif
 	DO_KVM	\intnum, SPRN_SRR1
-	std	r16,PACA_EXTLB+EX_TLB_R16(r13)
+	std	r16,PACA_EXGEN+EX_R16(r13)
 	mfspr	r16,\addr		/* get faulting address */
-	std	r14,PACA_EXTLB+EX_TLB_R14(r13)
+	std	r14,PACA_EXGEN+EX_R14(r13)
 	ld	r14,PACAPGD(r13)
-	std	r15,PACA_EXTLB+EX_TLB_R15(r13)
-	std	r10,PACA_EXTLB+EX_TLB_CR(r13)
+	std	r15,PACA_EXGEN+EX_R15(r13)
+	std	r10,PACA_EXGEN+EX_CR(r13)
 	TLB_MISS_PROLOG_STATS_BOLTED
 .endm
 
 .macro tlb_epilog_bolted
-	ld	r14,PACA_EXTLB+EX_TLB_CR(r13)
-	ld	r10,PACA_EXTLB+EX_TLB_R10(r13)
-	ld	r11,PACA_EXTLB+EX_TLB_R11(r13)
+	ld	r14,PACA_EXGEN+EX_CR(r13)
+	ld	r10,PACA_EXGEN+EX_R10(r13)
+	ld	r11,PACA_EXGEN+EX_R11(r13)
 	mtcr	r14
-	ld	r14,PACA_EXTLB+EX_TLB_R14(r13)
-	ld	r15,PACA_EXTLB+EX_TLB_R15(r13)
+	ld	r14,PACA_EXGEN+EX_R14(r13)
+	ld	r15,PACA_EXGEN+EX_R15(r13)
 	TLB_MISS_RESTORE_STATS_BOLTED
-	ld	r16,PACA_EXTLB+EX_TLB_R16(r13)
-	mfspr	r13,SPRN_SPRG_TLB_SCRATCH
+	ld	r16,PACA_EXGEN+EX_R16(r13)
+	mfspr	r13,SPRN_SPRG_GEN_SCRATCH
 .endm
 
 /* Data TLB miss */

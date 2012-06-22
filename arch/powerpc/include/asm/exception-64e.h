@@ -38,8 +38,11 @@
  */
 
 
-/* We are out of SPRGs so we save some things in the PACA. The normal
- * exception frame is smaller than the CRIT or MC one though
+/* We are out of SPRGs so we save some things in the 8 slots available in PACA.
+ * The normal exception frame is smaller than the CRIT or MC one though
+ *
+ * Bolted TLB miss exception variant also uses these slots which in combination
+ * with pgd and kernel_pgd fits in one 64-byte cache line.
  */
 #define EX_R1		(0 * 8)
 #define EX_CR		(1 * 8)
@@ -47,13 +50,10 @@
 #define EX_R11		(3 * 8)
 #define EX_R14		(4 * 8)
 #define EX_R15		(5 * 8)
+#define EX_R16		(6 * 8)
 
 /*
- * The TLB miss exception uses different slots.
- *
- * The bolted variant uses only the first six fields,
- * which in combination with pgd and kernel_pgd fits in
- * one 64-byte cache line.
+ * PACA slots offset for standard TLB miss exception.
  */
 
 #define EX_TLB_R10	( 0 * 8)

@@ -45,6 +45,12 @@ unsigned long kvmppc_booke_handlers;
 #define VM_STAT(x) offsetof(struct kvm, stat.x), KVM_STAT_VM
 #define VCPU_STAT(x) offsetof(struct kvm_vcpu, stat.x), KVM_STAT_VCPU
 
+#ifdef CONFIG_64BIT
+#define _hard_irq_disable() hard_irq_disable()
+#else
+#define _hard_irq_disable() local_irq_disable()
+#endif
+
 struct kvm_stats_debugfs_item debugfs_entries[] = {
 	{ "mmio",       VCPU_STAT(mmio_exits) },
 	{ "dcr",        VCPU_STAT(dcr_exits) },
@@ -456,7 +462,7 @@ int kvmppc_core_prepare_to_enter(struct kvm_vcpu *vcpu)
 		local_irq_enable();
 		kvm_vcpu_block(vcpu);
 		clear_bit(KVM_REQ_UNHALT, &vcpu->requests);
-		local_irq_disable();
+		_hard_irq_disable();
 
 		kvmppc_set_exit_type(vcpu, EMULATED_MTMSRWE_EXITS);
 		r = 1;
@@ -480,7 +486,7 @@ static int kvmppc_prepare_to_enter(struct kvm_vcpu *vcpu)
 		if (need_resched()) {
 			local_irq_enable();
 			cond_resched();
-			local_irq_disable();
+			_hard_irq_disable();
 			continue;
 		}
 
@@ -515,7 +521,7 @@ int kvmppc_vcpu_run(struct kvm_run *kvm_run, struct kvm_vcpu *vcpu)
 		return -EINVAL;
 	}
 
-	local_irq_disable();
+	_hard_irq_disable();
 	if (kvmppc_prepare_to_enter(vcpu)) {
 		kvm_run->exit_reason = KVM_EXIT_INTR;
 		ret = -EINTR;
@@ -976,7 +982,7 @@ int kvmppc_handle_exit(struct kvm_run *run, struct kvm_vcpu *vcpu,
 	 * aren't already exiting to userspace for some other reason.
 	 */
 	if (!(r & RESUME_HOST)) {
-		local_irq_disable();
+		_hard_irq_disable();
 		if (kvmppc_prepare_to_enter(vcpu)) {
 			run->exit_reason = KVM_EXIT_INTR;
 			r = (-EINTR << 2) | RESUME_HOST | (r & RESUME_FLAG_NV);

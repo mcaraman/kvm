@@ -90,6 +90,9 @@ static inline ulong kvmppc_get_ea_indexed(struct kvm_vcpu *vcpu, int ra, int rb)
 	if (ra)
 		ea += kvmppc_get_gpr(vcpu, ra);
 
+	if (!(vcpu->arch.shared->msr & MSR_CM))
+		ea &= 0xffffffffUL;
+
 	return ea;
 }
 
